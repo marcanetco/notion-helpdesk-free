@@ -156,17 +156,35 @@ export function findThreadTicketRequest(messageIds, ticketsDatabaseId) {
   };
 }
 
-// A follow-up as a comment: the author's name in bold, then the cleaned text.
-// Starting with the name means a customer email never starts with the Reply marker.
-// Text past Notion's 100-piece limit (about 200,000 characters) is dropped.
-export function addCommentRequest(ticketId, cleaned) {
-  const name = { type: 'text', text: { content: cleaned.sender.name.slice(0, MAX_TEXT) }, annotations: { bold: true } };
-  const body = cleaned.body ? richText(`\n${cleaned.body}`).slice(0, MAX_RICH_TEXT - 1) : [];
-  return {
-    method: 'POST',
-    url: `${API}/comments`,
-    body: { parent: { page_id: ticketId }, rich_text: [name, ...body] },
-  };
+const MAX_COMMENT_FILES = 3; // attachments per comment
+
+const bold = (s) => ({ type: 'text', text: { content: s.slice(0, MAX_TEXT) }, annotations: { bold: true } });
+const commentAttachments = (files) => files.map(({ id }) => ({ type: 'file_upload', file_upload_id: id }));
+const comment = (ticketId, richText, files) => ({
+  method: 'POST',
+  url: `${API}/comments`,
+  body: { parent: { page_id: ticketId }, rich_text: richText, ...(files.length ? { attachments: commentAttachments(files) } : {}) },
+});
+
+// A follow-up as a comment: the author's name in bold, then the cleaned text,
+// then a line per attachment that could not be stored. Starting with the name
+// means a customer email never starts with the Reply marker.
+// Stored attachments go on the comment, 3 at most (Notion's limit); the rest go
+// on more comments of 3, each saying it continues the follow-up.
+// Text past Notion's 100-piece limit (about 200,000 characters) is dropped, never the notes.
+// uploads: the result of collectUploads (src/inbound/attachments.js).
+export function addCommentRequests(ticketId, cleaned, uploads = NO_UPLOADS) {
+  const name = cleaned.sender.name;
+  const notes = uploads.failed.map(({ name: file, reason }) => `⚠️ Attachment not stored: ${file} (${reason})`);
+  const notesText = notes.length ? richText(`${cleaned.body ? '\n\n' : '\n'}${notes.join('\n')}`) : [];
+  const body = cleaned.body ? richText(`\n${cleaned.body}`).slice(0, MAX_RICH_TEXT - 1 - notesText.length) : [];
+  const batches = [];
+  for (let i = 0; i < uploads.files.length; i += MAX_COMMENT_FILES) batches.push(uploads.files.slice(i, i + MAX_COMMENT_FILES));
+  const [first = [], ...rest] = batches;
+  return [
+    comment(ticketId, [bold(name), ...body, ...notesText].slice(0, MAX_RICH_TEXT), first),
+    ...rest.map((files) => comment(ticketId, [bold(`${name} (attachments, continued)`)], files)),
+  ];
 }
 
 // Adds the follow-up's Message-ID to the Ticket's Message-IDs (one per line),

@@ -57,7 +57,7 @@ Les mots de passe d'application ne sont pas offerts quand le compte se connecte 
 | Utilisateur | l'adresse de support complète | l'adresse de support complète | l'adresse de support complète |
 | Mot de passe | le mot de passe d'application | votre mot de passe, ou un mot de passe propre à l'application si la 2FA est active | le mot de passe de la boîte |
 
-La version gratuite ne fait que lire les courriels. La version payante envoie aussi en SMTP avec le même utilisateur et le même mot de passe (Gmail : `smtp.gmail.com`, port 465, SSL/TLS) : gardez ces informations sous la main.
+La version gratuite ne fait que lire les courriels. La version payante envoie aussi en SMTP avec le même utilisateur et le même mot de passe (Gmail : `smtp.gmail.com`, port 465 avec SSL/TLS, ou port 587 sans SSL/TLS si le 465 expire) : gardez ces informations sous la main.
 
 ### Vérifier l'adressage plus
 
@@ -65,7 +65,7 @@ Depuis une autre adresse, écrivez à votre adresse de support avec `+test` avan
 
 ## 5. Importer et configurer le workflow
 
-1. Dans n8n, importez le workflow : depuis la bibliothèque de templates n8n, **Use workflow** ; depuis un fichier, créez un workflow, puis `•••` (en haut à droite) → **Import from File…** → `inbound.json`.
+1. Dans n8n, importez le workflow : depuis la bibliothèque de templates n8n, **Use workflow** ; depuis un fichier, créez un workflow, puis `•••` (en haut à droite) → **Import from File…** → [`inbound.json`](https://github.com/marcanetco/notion-helpdesk-free/releases/latest/download/inbound.json).
 2. Ouvrez **Email received** → **Credential** → **Create new credential** (IMAP) et remplissez-le avec les informations de l'étape 4.
 3. Ouvrez **Find Ticket**, créez un accès **Notion API** dans son champ de credential et collez-y le secret de l'intégration de l'étape 2. Choisissez ensuite ce même accès dans chacun des autres nœuds HTTP Request (12 en tout). Si c'est votre seul accès Notion, n8n l'a peut-être déjà sélectionné.
 4. Ouvrez **Settings** et remplacez `PASTE_TICKETS_DATABASE_ID` et `PASTE_CONTACTS_DATABASE_ID` par les identifiants de l'étape 3.

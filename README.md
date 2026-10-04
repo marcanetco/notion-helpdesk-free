@@ -55,7 +55,7 @@ App passwords aren't available when the account signs in with security keys only
 | User | the full support address | the full support address | the full support address |
 | Password | the app password | your password, or an app-specific password if 2FA is on | the mailbox password |
 
-The Free tier only reads mail. The Paid tier also sends over SMTP with the same user and password (Gmail: `smtp.gmail.com`, port 465, SSL/TLS), so keep these details at hand.
+The Free tier only reads mail. The Paid tier also sends over SMTP with the same user and password (Gmail: `smtp.gmail.com`, port 465 with SSL/TLS, or port 587 with SSL/TLS off if 465 times out), so keep these details at hand.
 
 ### Check plus-addressing
 
@@ -63,7 +63,7 @@ Send an email from another address to your support address with `+test` before t
 
 ## 5. Import and configure the workflow
 
-1. In n8n, import the workflow: from the n8n template library, **Use workflow**; from a file, create a workflow, then `•••` (top right) → **Import from File…** → `inbound.json`.
+1. In n8n, import the workflow: from the n8n template library, **Use workflow**; from a file, create a workflow, then `•••` (top right) → **Import from File…** → [`inbound.json`](https://github.com/marcanetco/notion-helpdesk-free/releases/latest/download/inbound.json).
 2. Open **Email received** → **Credential** → **Create new credential** (IMAP) and fill in the details from step 4.
 3. Open **Find Ticket**, create a **Notion API** credential in its credential field and paste the integration secret from step 2. Then pick the same credential in every other HTTP Request node (12 in all). If it's your only Notion credential, n8n may have selected it already.
 4. Open **Settings** and replace `PASTE_TICKETS_DATABASE_ID` and `PASTE_CONTACTS_DATABASE_ID` with the ids from step 3.
