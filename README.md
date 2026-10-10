@@ -2,8 +2,6 @@
 
 *[Version française](README.fr.md)*
 
-> This repo is generated from the Notion HelpDesk source and updated with each release: it isn't edited here and doesn't take issues or pull requests. The up-to-date setup guide is at [marcan.co/notion-helpdesk](https://marcan.co/notion-helpdesk/), and questions go to the [n8n community forum](https://community.n8n.io).
-
 Notion HelpDesk by Marcan et Co. turns every email to your support address into a Ticket in Notion. This guide sets up the Free tier in about 15 minutes.
 
 ## What you need
@@ -21,10 +19,10 @@ Don't rename the database properties: the workflow finds them by name. In the Ti
 
 ## 2. Create the Notion integration
 
-1. Go to [notion.so/profile/integrations](https://www.notion.so/profile/integrations) → **New integration**. Type **Internal**, workspace: the one holding your copy.
-2. In **Capabilities**, keep **Read content**, **Update content** and **Insert content**, and turn on **Insert comments** (follow-ups are added as comments). Save.
-3. Copy the **Internal Integration Secret**. You'll paste it into n8n in step 5.
-4. Back in Notion, open the page that holds your copy → `•••` → **Connections** → add your integration. Both databases inherit the access.
+1. In the workspace holding your copy, go to [app.notion.com/developers/connections](https://app.notion.com/developers/connections) (**Developer tools** → **Connections**) → **New connection**. Give it a name (for example "Notion HelpDesk"), choose the **API token** authentication method (not **OAuth**) and click **Create connection**.
+2. In **Capabilities**, keep **Read content**, **Update content** and **Insert content**, and turn on **Read comments** and **Insert comments**: follow-ups are added as comments, and the Paid tier reads comments.
+3. Under **Integration token**, copy the **API token** (copy icon at the right of the field). You'll paste it into n8n in step 5.
+4. Back in Notion, open the page that holds your copy → `•••` → **Connections** → add your integration. That page and its subpages inherit the access.
 
 ## 3. Copy the database ids
 
@@ -65,14 +63,14 @@ Send an email from another address to your support address with `+test` before t
 
 1. In n8n, import the workflow: from the n8n template library, **Use workflow**; from a file, create a workflow, then `•••` (top right) → **Import from File…** → [`inbound.json`](https://github.com/marcanetco/notion-helpdesk-free/releases/latest/download/inbound.json).
 2. Open **Email received** → **Credential** → **Create new credential** (IMAP) and fill in the details from step 4.
-3. Open **Find Ticket**, create a **Notion API** credential in its credential field and paste the integration secret from step 2. Then pick the same credential in every other HTTP Request node (12 in all). If it's your only Notion credential, n8n may have selected it already.
+3. Open **Find Ticket**, create a **Notion API** credential in its credential field and paste the API token from step 2. Then pick the same credential in every other HTTP Request node (12 in all). If it's your only Notion credential, n8n will have selected it already.
 4. Open **Settings** and replace `PASTE_TICKETS_DATABASE_ID` and `PASTE_CONTACTS_DATABASE_ID` with the ids from step 3.
 5. Save.
 
 ## 6. Test, then publish
 
 1. Click **Execute workflow**, then send an email to your support address from another address. Usually within seconds, a Ticket appears in Notion with the email as its body and you as its Requester.
-2. Click **Execute workflow** again and reply to that email from the address you sent it from, in the same thread: the reply is added to the same Ticket as a comment.
+2. Test a follow-up. Click **Execute workflow** again, since in test mode each click handles one email. From the address used in step 1, open the email you sent (in your **Sent** folder) and click **Reply**. Instead of opening a new Ticket, this follow-up is added as a comment on the step 1 Ticket.
 3. Before you publish, mark as read any old emails in the support inbox that shouldn't become Tickets: the workflow picks up unread emails.
 4. Publish (activate) the workflow. It stays connected to the inbox and picks up each new email as it arrives.
 

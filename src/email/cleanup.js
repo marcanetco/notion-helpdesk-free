@@ -42,7 +42,7 @@ const CP1252 = {
 };
 const CONT = '[\\u0080-\\u00BF€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]';
 // A UTF-8 lead byte (0xC2–0xF4) read as Latin-1/Windows-1252, followed by continuation bytes.
-const MOJIBAKE_RE = new RegExp(`[\\u00C2-\\u00F4]${CONT}+`, 'g');
+const MOJIBAKE_RE = new RegExp('[\\u00C2-\\u00F4]' + CONT + '+', 'g');
 
 function byteOf(ch) {
   const code = ch.charCodeAt(0);
@@ -127,14 +127,14 @@ export function htmlToText(html) {
     .replace(/<(head|style|script|title|xml)\b[\s\S]*?<\/\1\s*>/gi, '')
     .replace(/\s+/g, ' ') // source newlines are just whitespace in HTML
     .replace(/<br\b[^>]*>/gi, '\n')
-    .replace(/<hr\b[^>]*>/gi, `${EDGE}________________________________${EDGE}`)
-    .replace(/<li\b[^>]*>/gi, `${EDGE}- `)
-    .replace(new RegExp(`</?(?:${BLOCK})\\b[^>]*>`, 'gi'), EDGE)
+    .replace(/<hr\b[^>]*>/gi, EDGE + '________________________________' + EDGE)
+    .replace(/<li\b[^>]*>/gi, EDGE + '- ')
+    .replace(new RegExp('</?(?:' + BLOCK + ')\\b[^>]*>', 'gi'), EDGE)
     .replace(/<\/t[dh]\s*>/gi, ' ')
     .replace(/<[^>]*>/g, '');
   const text = marked
-    .replace(new RegExp(`${EDGE}(?:[ ]*${EDGE})*`, 'g'), EDGE)
-    .replace(new RegExp(`(^|\\n)[ ]*${EDGE}`, 'g'), '$1') // an edge right after a <br> adds nothing
+    .replace(new RegExp(EDGE + '(?:[ ]*' + EDGE + ')*', 'g'), EDGE)
+    .replace(new RegExp('(^|\\n)[ ]*' + EDGE, 'g'), '$1') // an edge right after a <br> adds nothing
     .replaceAll(EDGE, '\n');
   return decodeEntities(text);
 }
@@ -222,7 +222,7 @@ export function parseSender(from) {
   const email = String(first.address ?? '').trim().toLowerCase();
   let name = normaliseWhitespace(fixDoubleEncoding(String(first.name ?? ''))).replace(/^["']+|["']+$/g, '').trim();
   const comma = name.match(/^([^,]+),\s*([^,]+)$/);
-  if (comma) name = `${comma[2]} ${comma[1]}`;
+  if (comma) name = comma[2] + ' ' + comma[1];
   if (!name || name.toLowerCase() === email) return { name: email, firstName: '', lastName: '', email };
   const [firstName, ...rest] = name.split(/\s+/);
   return { name, firstName, lastName: rest.join(' '), email };

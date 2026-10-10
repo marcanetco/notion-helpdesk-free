@@ -9,12 +9,12 @@ const ATTACHMENT_KEY = /^attachment_(\d+)$/;
 
 const fallbackName = (index, mimeType) => {
   const subtype = /^[a-z]+\/([a-z0-9]+)$/i.exec(mimeType ?? '')?.[1];
-  return `attachment-${index + 1}${subtype && subtype !== 'octet' && !/stream/.test(subtype) ? `.${subtype}` : ''}`;
+  return 'attachment-' + (index + 1) + (subtype && subtype !== 'octet' && !/stream/.test(subtype) ? '.' + subtype : '');
 };
 
 // The request's multipart body (the file itself) is set in the Send file node.
 export function sendFileRequest(uploadId) {
-  return { method: 'POST', url: `${FILE_UPLOADS}/${uploadId}/send` };
+  return { method: 'POST', url: FILE_UPLOADS + '/' + uploadId + '/send' };
 }
 
 export function startUploadRequest(filename, contentType) {
@@ -53,7 +53,7 @@ export function collectUploads(uploads) {
   const failed = [];
   for (const { filename, started, sent } of uploads) {
     if (sent?.object === 'file_upload' && sent.status === 'uploaded') files.push({ id: sent.id, name: filename });
-    else failed.push({ name: filename, reason: started?.error?.message || sent?.error?.message || `upload status: ${sent?.status ?? 'unknown'}` });
+    else failed.push({ name: filename, reason: started?.error?.message || sent?.error?.message || 'upload status: ' + (sent?.status ?? 'unknown') });
   }
   return { files, failed };
 }

@@ -27,7 +27,7 @@ export function textToBlocks(text, maxBlocks = MAX_BLOCKS) {
 export function findContactRequest(email, contactsDatabaseId) {
   return {
     method: 'POST',
-    url: `${API}/databases/${contactsDatabaseId}/query`,
+    url: API + '/databases/' + contactsDatabaseId + '/query',
     body: { filter: { property: 'Email', email: { equals: email } }, page_size: 1 },
   };
 }
@@ -35,7 +35,7 @@ export function findContactRequest(email, contactsDatabaseId) {
 export function createContactRequest(sender, contactsDatabaseId) {
   return {
     method: 'POST',
-    url: `${API}/pages`,
+    url: API + '/pages',
     body: {
       parent: { database_id: contactsDatabaseId },
       properties: {
@@ -54,7 +54,7 @@ export function createContactRequest(sender, contactsDatabaseId) {
 export function findTicketRequest(messageId, ticketsDatabaseId) {
   return {
     method: 'POST',
-    url: `${API}/databases/${ticketsDatabaseId}/query`,
+    url: API + '/databases/' + ticketsDatabaseId + '/query',
     body: {
       filter: { property: 'Message-IDs', rich_text: messageId ? { contains: messageId } : { is_empty: true } },
       page_size: 1,
@@ -65,7 +65,7 @@ export function findTicketRequest(messageId, ticketsDatabaseId) {
 const notStored = ({ name, reason }) => ({
   object: 'block',
   type: 'callout',
-  callout: { icon: { type: 'emoji', emoji: '⚠️' }, rich_text: richText(`Attachment not stored: ${name} (${reason})`) },
+  callout: { icon: { type: 'emoji', emoji: '⚠️' }, rich_text: richText('Attachment not stored: ' + name + ' (' + reason + ')') },
 });
 
 // The email text, then a callout per attachment that could not be stored.
@@ -96,7 +96,7 @@ const NO_UPLOADS = { files: [], failed: [] };
 export function createTicketRequest(cleaned, contactId, ticketsDatabaseId, uploads = NO_UPLOADS) {
   return {
     method: 'POST',
-    url: `${API}/pages`,
+    url: API + '/pages',
     body: { ...ticketPage(cleaned, contactId, ticketsDatabaseId, uploads), children: emailBlocks(cleaned, uploads) },
   };
 }
@@ -111,7 +111,7 @@ export function createTicketFromTemplateRequest(cleaned, contactId, ticketsDatab
   delete page.properties['Message-IDs'];
   return {
     method: 'POST',
-    url: `${API}/pages`,
+    url: API + '/pages',
     body: { ...page, template: { type: 'default' } },
   };
 }
@@ -119,7 +119,7 @@ export function createTicketFromTemplateRequest(cleaned, contactId, ticketsDatab
 export function storeMessageIdRequest(pageId, messageId) {
   return {
     method: 'PATCH',
-    url: `${API}/pages/${pageId}`,
+    url: API + '/pages/' + pageId,
     body: { properties: { 'Message-IDs': { rich_text: richText(messageId || '') } } },
   };
 }
@@ -133,7 +133,7 @@ export function isNoDefaultTemplateError(errorItem) {
 export function addEmailRequest(pageId, cleaned, uploads = NO_UPLOADS) {
   return {
     method: 'PATCH',
-    url: `${API}/blocks/${pageId}/children`,
+    url: API + '/blocks/' + pageId + '/children',
     body: { children: emailBlocks(cleaned, uploads), position: { type: 'start' } },
   };
 }
@@ -147,7 +147,7 @@ const MAX_RICH_TEXT = 100; // rich text pieces per comment or property
 export function findThreadTicketRequest(messageIds, ticketsDatabaseId) {
   return {
     method: 'POST',
-    url: `${API}/databases/${ticketsDatabaseId}/query`,
+    url: API + '/databases/' + ticketsDatabaseId + '/query',
     body: {
       filter: { or: messageIds.map((id) => ({ property: 'Message-IDs', rich_text: { contains: id } })) },
       sorts: [{ timestamp: 'created_time', direction: 'ascending' }],
@@ -162,7 +162,7 @@ const bold = (s) => ({ type: 'text', text: { content: s.slice(0, MAX_TEXT) }, an
 const commentAttachments = (files) => files.map(({ id }) => ({ type: 'file_upload', file_upload_id: id }));
 const comment = (ticketId, richText, files) => ({
   method: 'POST',
-  url: `${API}/comments`,
+  url: API + '/comments',
   body: { parent: { page_id: ticketId }, rich_text: richText, ...(files.length ? { attachments: commentAttachments(files) } : {}) },
 });
 
@@ -175,15 +175,15 @@ const comment = (ticketId, richText, files) => ({
 // uploads: the result of collectUploads (src/inbound/attachments.js).
 export function addCommentRequests(ticketId, cleaned, uploads = NO_UPLOADS) {
   const name = cleaned.sender.name;
-  const notes = uploads.failed.map(({ name: file, reason }) => `⚠️ Attachment not stored: ${file} (${reason})`);
-  const notesText = notes.length ? richText(`${cleaned.body ? '\n\n' : '\n'}${notes.join('\n')}`) : [];
-  const body = cleaned.body ? richText(`\n${cleaned.body}`).slice(0, MAX_RICH_TEXT - 1 - notesText.length) : [];
+  const notes = uploads.failed.map(({ name: file, reason }) => '⚠️ Attachment not stored: ' + file + ' (' + reason + ')');
+  const notesText = notes.length ? richText((cleaned.body ? '\n\n' : '\n') + notes.join('\n')) : [];
+  const body = cleaned.body ? richText('\n' + cleaned.body).slice(0, MAX_RICH_TEXT - 1 - notesText.length) : [];
   const batches = [];
   for (let i = 0; i < uploads.files.length; i += MAX_COMMENT_FILES) batches.push(uploads.files.slice(i, i + MAX_COMMENT_FILES));
   const [first = [], ...rest] = batches;
   return [
     comment(ticketId, [bold(name), ...body, ...notesText].slice(0, MAX_RICH_TEXT), first),
-    ...rest.map((files) => comment(ticketId, [bold(`${name} (attachments, continued)`)], files)),
+    ...rest.map((files) => comment(ticketId, [bold(name + ' (attachments, continued)')], files)),
   ];
 }
 
@@ -198,7 +198,7 @@ export function appendMessageIdRequest(ticket, messageId) {
   if (messageId && !ids.includes(messageId)) ids.push(messageId);
   return {
     method: 'PATCH',
-    url: `${API}/pages/${ticket.id}`,
+    url: API + '/pages/' + ticket.id,
     body: { properties: { 'Message-IDs': { rich_text: richText(ids.join('\n')) } } },
   };
 }

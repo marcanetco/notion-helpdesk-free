@@ -11,7 +11,7 @@ const ID_RE = /<[^<>\s]+>|[^<>\s,]+@[^<>\s,]+/g;
 // Every Message-ID in a header value, in order, always in <angle brackets>.
 function messageIds(value) {
   const values = Array.isArray(value) ? value : [value];
-  return values.flatMap((v) => String(v ?? '').match(ID_RE) ?? []).map((id) => (id.startsWith('<') ? id : `<${id}>`));
+  return values.flatMap((v) => String(v ?? '').match(ID_RE) ?? []).map((id) => (id.startsWith('<') ? id : '<' + id + '>'));
 }
 
 // The Message-IDs to look a Ticket up by, most recent first: In-Reply-To, then

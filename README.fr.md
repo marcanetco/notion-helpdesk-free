@@ -2,8 +2,6 @@
 
 *[English version](README.md)*
 
-> Ce dépôt est généré à partir de la source de HelpDesk Notion et mis à jour à chaque version : il n'est pas modifié ici et n'accepte ni issues ni pull requests. Le guide d'installation à jour est sur [marcan.co/helpdesk-notion](https://marcan.co/helpdesk-notion/), et les questions vont sur le [forum de la communauté n8n](https://community.n8n.io).
-
 HelpDesk Notion par Marcan et Co. transforme chaque courriel reçu à votre adresse de support en Ticket dans Notion. Ce guide met en place la version gratuite en une quinzaine de minutes.
 
 Le modèle Notion et n8n sont en anglais : les noms de propriétés, de nœuds et de boutons sont donc cités tels qu'ils apparaissent à l'écran.
@@ -23,10 +21,10 @@ Ne renommez pas les propriétés des bases : le workflow les retrouve par leur n
 
 ## 2. Créer l'intégration Notion
 
-1. Allez sur [notion.so/profile/integrations](https://www.notion.so/profile/integrations) → **New integration**. Type **Internal**, espace de travail : celui qui contient votre copie.
-2. Dans **Capabilities**, gardez **Read content**, **Update content** et **Insert content**, et activez **Insert comments** (les suivis sont ajoutés en commentaires). Enregistrez.
-3. Copiez l'**Internal Integration Secret**. Vous le collerez dans n8n à l'étape 5.
-4. De retour dans Notion, ouvrez la page qui contient votre copie → `•••` → **Connexions** (**Connections**) → ajoutez votre intégration. Les deux bases héritent de l'accès.
+1. Dans l'espace de travail qui contient votre copie, allez sur [app.notion.com/developers/connections](https://app.notion.com/developers/connections) (**Developer tools** → **Connections**) → **New connection**. Donnez-lui un nom (par exemple « Notion HelpDesk »), choisissez la méthode d'authentification **API token** (pas **OAuth**) et cliquez sur **Create connection**.
+2. Dans **Capabilities**, gardez **Read content**, **Update content** et **Insert content**, et activez **Read comments** et **Insert comments** : les suivis sont ajoutés en commentaires, et la version payante lit les commentaires.
+3. Sous **Integration token**, copiez l'**API token** (icône de copie à droite du champ). Vous le collerez dans n8n à l'étape 5.
+4. De retour dans Notion, ouvrez la page qui contient votre copie → `•••` → **Connexions** (**Connections**) → ajoutez votre intégration. Cette page et ses sous-pages héritent de l'accès.
 
 ## 3. Copier les identifiants des bases
 
@@ -67,14 +65,14 @@ Depuis une autre adresse, écrivez à votre adresse de support avec `+test` avan
 
 1. Dans n8n, importez le workflow : depuis la bibliothèque de templates n8n, **Use workflow** ; depuis un fichier, créez un workflow, puis `•••` (en haut à droite) → **Import from File…** → [`inbound.json`](https://github.com/marcanetco/notion-helpdesk-free/releases/latest/download/inbound.json).
 2. Ouvrez **Email received** → **Credential** → **Create new credential** (IMAP) et remplissez-le avec les informations de l'étape 4.
-3. Ouvrez **Find Ticket**, créez un accès **Notion API** dans son champ de credential et collez-y le secret de l'intégration de l'étape 2. Choisissez ensuite ce même accès dans chacun des autres nœuds HTTP Request (12 en tout). Si c'est votre seul accès Notion, n8n l'a peut-être déjà sélectionné.
+3. Ouvrez **Find Ticket**, créez un accès **Notion API** dans son champ de credential et collez-y l'API token de l'étape 2. Choisissez ensuite ce même accès dans chacun des autres nœuds HTTP Request (12 en tout). Si c'est votre seul accès Notion, n8n l'aura déjà sélectionné.
 4. Ouvrez **Settings** et remplacez `PASTE_TICKETS_DATABASE_ID` et `PASTE_CONTACTS_DATABASE_ID` par les identifiants de l'étape 3.
 5. Enregistrez.
 
 ## 6. Tester, puis publier
 
 1. Cliquez sur **Execute workflow**, puis écrivez à votre adresse de support depuis une autre adresse. Habituellement en quelques secondes, un Ticket apparaît dans Notion, avec le courriel comme contenu et vous comme Requester.
-2. Cliquez de nouveau sur **Execute workflow** et répondez à ce courriel depuis l'adresse qui l'a envoyé, dans la même conversation : la réponse s'ajoute au même Ticket en commentaire.
+2. Testez un suivi. Cliquez de nouveau sur **Execute workflow**, car en mode test chaque clic ne traite qu'un courriel. Depuis l'adresse de l'étape 1, ouvrez le courriel envoyé (dans vos **Éléments envoyés**) et faites **Répondre**. Au lieu de créer un nouveau Ticket, ce suivi s'ajoute en commentaire au Ticket de l'étape 1.
 3. Avant de publier, marquez comme lus les anciens courriels de la boîte de support qui ne doivent pas devenir des Tickets : le workflow ramasse les courriels non lus.
 4. Publiez (activez) le workflow. Il reste connecté à la boîte et ramasse chaque nouveau courriel dès son arrivée.
 
