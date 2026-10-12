@@ -14,7 +14,7 @@ Le modèle Notion et n8n sont en anglais : les noms de propriétés, de nœuds e
 
 ## 1. Dupliquer le modèle Notion
 
-1. Ouvrez le [modèle HelpDesk Notion](https://marcanetco.notion.site/Notion-HelpDesk-3ea524fadb0d80619080e48a163b2cf1) et cliquez sur **Dupliquer** (**Duplicate**), en haut à droite. Choisissez l'espace de travail de votre help desk.
+1. Ouvrez le [modèle HelpDesk Notion](https://marcanetco.notion.site/Notion-HelpDesk-3ea524fadb0d80619080e48a163b2cf1) et cliquez sur **Dupliquer** (**Duplicate**), en haut à droite. Choisissez l'espace de travail où vous souhaitez mettre en place votre help desk.
 2. La copie contient une base **Tickets**, une base **Contacts** et une page **Settings**. Gardez-les ensemble sous la même page.
 
 Ne renommez pas les propriétés des bases : le workflow les retrouve par leur nom. Dans la base Tickets, **New** doit rester l'option de Status par défaut, puisque les nouveaux Tickets reçoivent la valeur par défaut. Vous pouvez changer la mise en page du corps des Tickets en modifiant le modèle par défaut de la base Tickets (`New` ▾ → `•••` du modèle). Le courriel s'insère au-dessus.
